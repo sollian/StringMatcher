@@ -5,14 +5,13 @@ import com.sollian.stringmatcher.result.ResultSet;
 
 /**
  * KMP算法进行字符串匹配
- *
  */
 public class KMPAlgorithm implements IAlgorithm {
     @Override
     public ResultSet find(String from, String target) {
         ResultSet set = new ResultSet();
 
-        int[] inform = preprocessing(target);
+        int[] next = getNext(target);
 
         int i = 0;
         int j = 0;
@@ -22,32 +21,35 @@ public class KMPAlgorithm implements IAlgorithm {
                 i++;
                 j++;
             } else {
-                j = inform[j];
+                j = next[j];
             }
             if (j == target.length()) {
                 set.add(new Result(i - target.length(), i));
-                j = inform[j];
+                j = next[j];
             }
         }
         return set;
     }
 
-    private static int[] preprocessing(CharSequence target) {
-        int[] inform = new int[target.length() + 1];
+    /**
+     * 获取next数组
+     */
+    private static int[] getNext(CharSequence target) {
+        int[] next = new int[target.length() + 1];
 
-        inform[0] = -1;
-
-        int j = 1;
-        int k = 0;
-        while (j < target.length()) {
+        int j = 0, k = -1;
+        next[0] = -1;
+        while (j < target.length() - 1) {
             if (k == -1 || target.charAt(j) == target.charAt(k)) {
                 j++;
                 k++;
-                inform[j] = k;
-            } else {
-                k = inform[k];
-            }
+                if (target.charAt(j) == target.charAt(k))// 当两个字符相同时，就跳过
+                    next[j] = next[k];
+                else
+                    next[j] = k;
+            } else
+                k = next[k];
         }
-        return inform;
+        return next;
     }
 }
